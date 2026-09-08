@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://paanddebookkeeping.com.au/sitemap.xml

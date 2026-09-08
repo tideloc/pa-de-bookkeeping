@@ -1,0 +1,28 @@
+# Deploys this static site to Cloudflare Pages on every push to main.
+# Needs repo secrets CLOUDFLARE_API_TOKEN (Account > Cloudflare Pages: Edit)
+# and CLOUDFLARE_ACCOUNT_ID. scripts/bake.mjs writes the hours, email and
+# announcement from src/content/site.json (the portal commits that file)
+# into the HTML before publishing.
+name: Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Bake portal content into the HTML
+        run: node scripts/bake.mjs
+      - name: Publish
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=pa-de-bookkeeping --branch=main --commit-dirty=true
